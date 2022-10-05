@@ -1,0 +1,138 @@
+﻿<Window x:Class="MenuTechWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MenuTechWPF"
+        mc:Ignorable="d"
+        Title="MenuTech" Height="450" Width="897">
+    <Window.DataContext>
+        <local:Customer/>
+    </Window.DataContext>
+    <Grid x:Name="MainGrid">
+
+        <Button Content="Login"  HorizontalAlignment="Left" Margin="65,48,0,0" VerticalAlignment="Top" Width="101" Height="36" Name="btnLogin" Click="btnLogin_Click"/>
+        <Button Name="StoreAccBalance" Content="Store account balance" HorizontalAlignment="Left" Margin="65,110,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.281,1.564" Height="46" Width="203" Click="StoreAccBalance_Click" />
+        <Button Content="Sign out" HorizontalAlignment="Left" Margin="180,48,0,0" VerticalAlignment="Top" Width="88" Height="36" Name="btnSignOut" IsEnabled="False"  Click="btnSignOut_Click"/>
+
+
+        <Grid x:Name="optionGrid" HorizontalAlignment="Left" Width="887">
+            <Button Content="Customer account balance" HorizontalAlignment="Left" Margin="63,187,0,0" VerticalAlignment="Top" Height="41" Width="203" Name="btnCustomerAccBalance" Click="btnCustomerAccBalance_Click"/>
+            <Button Content="PAY" HorizontalAlignment="Left" Margin="611,48,0,0" VerticalAlignment="Top" Width="140" Height="27" Name ="btnPay" Click="btnPay_Click">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=(Validation.HasError), ElementName=txtAmount}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsEnabled" Value="True"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <ComboBox HorizontalAlignment="Left" Margin="416,53,0,0" VerticalAlignment="Top" Width="145" Name="ddlCurrency" Text="Select" />
+            <Label Content="Currency:" HorizontalAlignment="Left" Margin="316,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.359,0.565"/>
+
+            <TextBox HorizontalAlignment="Left" Margin="416,96,0,0"  TextWrapping="Wrap" VerticalAlignment="Top" Width="145" 
+                     Name="txtAmount"  >
+
+
+                <TextBox.Style>
+                    <Style TargetType="{x:Type TextBox}">
+                        <Setter Property="Validation.ErrorTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <TextBlock  DockPanel.Dock="Bottom" Foreground="Red" FontSize="10pt" Text="{Binding ElementName=Adorner,Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                                        </TextBlock>
+                                        <Border  BorderBrush="Red" BorderThickness="2">
+                                            <AdornedElementPlaceholder Name="Adorner" />
+                                        </Border>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TextBox.Style>
+                <TextBox.Text>
+                    <Binding Path="amount" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <local:NumberValidation  ErrorMessage="Input allows only numbers" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+
+
+
+            <Label Content="Input amount:" HorizontalAlignment="Left" Margin="316,92,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.153,-0.443"/>
+
+            <TextBox HorizontalAlignment="Left" Margin="416,135,0,0"  TextWrapping="Wrap" VerticalAlignment="Top" Width="335" Name="txtTransactionId">
+
+                <TextBox.Style>
+                    <Style TargetType="{x:Type TextBox}">
+                        <Setter Property="Validation.ErrorTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <TextBlock  DockPanel.Dock="Bottom" Foreground="Red" FontSize="10pt" Text="{Binding ElementName=Adorner,Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                                        </TextBlock>
+                                        <Border  BorderBrush="Red" BorderThickness="2">
+                                            <AdornedElementPlaceholder Name="Adorner" />
+                                        </Border>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TextBox.Style>
+                <TextBox.Text>
+                    <Binding Path="transactionId" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <local:GUIDValidation  ErrorMessage="Not a valid guid." />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+
+
+
+            <Label Content="Transaction ID:" HorizontalAlignment="Left" Margin="316,131,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.153,-0.443"/>
+            <Button Content="Refund" HorizontalAlignment="Left" Margin="611,87,0,0" VerticalAlignment="Top" Height="27" Width="140" Name="btnRefund" Click="btnRefund_Click" IsEnabled="False">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=(Validation.HasError), ElementName=txtRefund}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsEnabled" Value="True"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Label Content="" HorizontalContentAlignment="Center" Name="lblLoginMsg" HorizontalAlignment="Left" TextElement.FontSize="24"   Margin="201,6,0,0" VerticalAlignment="Top" Width="364"/>
+            <DataGrid Margin="316,234,33,56" Name="dgTransactions" AutoGenerateColumns="False" ItemsSource="{Binding Customers}" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding customerId}" Header="Customer Id"></DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding transactionId}" Header="Transaction Id"></DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding transactionPlus}" Header="Transaction Plus"></DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding refund}" Header="Refund"></DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock HorizontalAlignment="Left" Margin="63,270,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="50" Width="203" Name="txbRequestSend"/>
+            <TextBlock HorizontalAlignment="Left" Margin="63,328,0,0" Text=""  TextWrapping="Wrap" VerticalAlignment="Top" Height="50" Width="203" Name="txbRequestRecieved"/>
+
+
+
+
+            <!--<Label Content="" Name="lblAmountError" Visibility="Hidden" Foreground="Red" HorizontalAlignment="Left" Margin="685,91,0,0" VerticalAlignment="Top"/>-->
+        </Grid>
+    </Grid>
+</Window>
