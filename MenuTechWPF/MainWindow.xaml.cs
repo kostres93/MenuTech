@@ -16,8 +16,7 @@ namespace MenuTechWPF
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {//TODO: stavi logout dugme
-        //TODO: stavi url u config fajl  pa izvuci a ne zakucati
+    {
         private const string URL = "https://localhost:44327/store";
         private const string URLTransactions = "https://localhost:44327/api/Transactions/";
         public Customer customer = new Customer();
@@ -49,17 +48,20 @@ namespace MenuTechWPF
         private void StoreAccBalance_Click(object sender, RoutedEventArgs e)
         {
 
-            HttpResponseMessage response = http.GetAsync(URL+ "/GetStoreAccBalance").Result;
-            txbRequestSend.Text = response.StatusCode.ToString() + response.Content.Headers.ToString();
-            var dataObj = response.Content.ReadAsStringAsync().Result;
-            
-            MessageBox.Show("Store account balance is " + dataObj.ToString(), "Store account balance", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            HttpResponseMessage response = http.GetAsync(URL + "/GetStoreAccBalance").Result;
+            txbRequestSend.Text = "Request send StatusCode: " + response.StatusCode.ToString();
 
             if (response.IsSuccessStatusCode)
             {
-                var dataObject = response.Content.ReadAsStringAsync().Result;
+                var dataObj = response.Content.ReadAsStringAsync().Result;
+                MessageBox.Show("Store account balance is " + dataObj.ToString(), "Store account balance", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                txbRequestRecieved.Text = dataObj;
             }
-            txbRequestRecieved.Text = dataObj;
+            else
+            {
+                txbRequestRecieved.Text = "Request recieved: " + response.StatusCode.ToString();
+            }
+
         }
 
         private void btnLogin_Click(object sender, RoutedEventArgs e)
@@ -90,12 +92,21 @@ namespace MenuTechWPF
 
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64UserString);
 
-            HttpResponseMessage response = http.GetAsync(URL + "/GetCustomerAccBalance/" + customer.customerId).Result;
-            var dataObj = response.Content.ReadAsStringAsync().Result;
-            if (dataObj.ToString()!="")
-            {
-                MessageBox.Show("Customer account balance is " + dataObj.ToString(), "Customer account balance", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            string urlRequest = URL + "/GetCustomerAccBalance/" + customer.customerId;
 
+            HttpResponseMessage response = http.GetAsync(urlRequest).Result;
+
+            txbRequestSend.Text = urlRequest + " Request send StatusCode: " + response.StatusCode.ToString();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var dataObj = response.Content.ReadAsStringAsync().Result;
+                MessageBox.Show("Customer account balance is " + dataObj.ToString(), "Customer account balance", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                txbRequestRecieved.Text = dataObj;
+            }
+            else
+            {
+                txbRequestRecieved.Text = "Request recieved: " + response.StatusCode.ToString();
             }
 
         }
@@ -105,35 +116,34 @@ namespace MenuTechWPF
 
             var userString = Encoding.UTF8.GetBytes(customer.userName + ":" + customer.password);
             string base64UserString = Convert.ToBase64String(userString);
+            string urlRequest = URL + "/Pay";
 
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64UserString);
 
-            var obj =  new 
-             {
+            var obj = new
+            {
                 customerId = customer.customerId,
-                currency =ddlCurrency.SelectedValue,
+                currency = ddlCurrency.SelectedValue,
                 amount = txtAmount.Text.ToString()
-             };
-
+            };
 
             var json = JsonSerializer.Serialize(obj);
-            
-            var content = new StringContent(json.ToString(),Encoding.UTF8, "application/json");
+            var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = http.PostAsync(URL+"/Pay" , content).Result;
-            var dataObj = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = http.PostAsync(urlRequest, content).Result;
+            txbRequestSend.Text = urlRequest + " Request send StatusCode: " + response.StatusCode.ToString() + json.ToString();
 
-            MessageBox.Show("Transaction id: "+dataObj.ToString(), "Payment information", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-
+            if (response.IsSuccessStatusCode)
+            {
+                var dataObj = response.Content.ReadAsStringAsync().Result;
+                MessageBox.Show("Transaction id: " + dataObj.ToString(), "Payment information", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                txbRequestRecieved.Text = dataObj;
+            }
+            else
+            {
+                txbRequestRecieved.Text = "Request recieved: " + response.StatusCode.ToString();
+            }
             GetTransactions(customer.customerId);
-
-        }
-
-        private void AllowOnlyDigits(object sender, TextCompositionEventArgs e)
-        {
-            // /Regex regex = new Regex(@"^\d*(\.\d+)?$");
-            // e.Handled = !regex.IsMatch(e.Text);
-
         }
 
         private void GetTransactions(int CustomerId)
@@ -156,7 +166,7 @@ namespace MenuTechWPF
                 if (customer.transactionPlus != null && customer.refund != 1)
                     btnRefund.IsEnabled = true;
             }
-           
+
 
         }
 
@@ -164,37 +174,49 @@ namespace MenuTechWPF
         {
             var userString = Encoding.UTF8.GetBytes(customer.userName + ":" + customer.password);
             string base64UserString = Convert.ToBase64String(userString);
+            string urlRequest = URL + "/Refund";
 
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64UserString);
             http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            
-            var obj  = new
+
+            var obj = new
             {
                 customerId = customer.customerId,
                 transactionId = txtTransactionId.Text,
                 amount = txtAmount.Text.ToString()
-                
+
             };
 
 
             var json = JsonSerializer.Serialize(obj);
+            var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
 
-            var content = new StringContent(json.ToString(),Encoding.UTF8,"application/json");
+            HttpResponseMessage response = http.PostAsync(urlRequest, content).Result;
+            txbRequestSend.Text = urlRequest + " Request send StatusCode: " + response.StatusCode.ToString() + json.ToString();
 
-            HttpResponseMessage response = http.PostAsync(URL + "/Refund", content).Result;
-            var dataObj = response.Content.ReadAsStringAsync().Result;
-            if (!Convert.ToBoolean(dataObj))
+
+            if (response.IsSuccessStatusCode)
             {
-                MessageBox.Show("Refund not possible!", "Refund information", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                var dataObj = response.Content.ReadAsStringAsync().Result;
+                if (!Convert.ToBoolean(dataObj))
+                {
+                    MessageBox.Show("Refund not possible!", "Refund information", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
 
+                }
+                txbRequestRecieved.Text = dataObj;
+            }
+            else
+            {
+                txbRequestRecieved.Text = "Request recieved: " + response.StatusCode.ToString();
             }
             GetTransactions(customer.customerId);
+
         }
 
         private void btnSignOut_Click(object sender, RoutedEventArgs e)
         {
             optionGrid.IsEnabled = false;
-            dgTransactions.ItemsSource=null;
+            dgTransactions.ItemsSource = null;
             dgTransactions.Items.Refresh();
             lblLoginMsg.Content = "";
             btnSignOut.IsEnabled = false;

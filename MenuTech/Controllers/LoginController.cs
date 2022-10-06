@@ -1,5 +1,7 @@
 ﻿using MenuTech.Models;
+using MenuTech.Models.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,24 +14,30 @@ namespace MenuTech.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-       
+        private MenuTechContext _context;
+        private readonly IMenuTechRepository _menuTechRepository;
+
+        public LoginController(MenuTechContext menuTechContext, IMenuTechRepository menuTechRepository)
+        {
+            _context = menuTechContext;
+            _menuTechRepository = menuTechRepository;
+        }
+
+
         [HttpGet]
         public object GetUser(string userName, string password)
         {
-            
-            MenuTechContext context = new MenuTechContext();
-
-            var base64EncodedBytes =Convert.FromBase64String(password);
-            Encoding.UTF8.GetString(base64EncodedBytes);
-
-            if (context.Customers.Any(c=>c.UserName==userName && c.Password== Encoding.UTF8.GetString(base64EncodedBytes)))
+            try
             {
-                var user = context.Customers.FirstOrDefault(c => c.UserName == userName && c.Password == Encoding.UTF8.GetString(base64EncodedBytes));
+                var user = _menuTechRepository.GetUser(userName, password);
+
                 return user;
             }
-            
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-            return false;
         }
     }
 }

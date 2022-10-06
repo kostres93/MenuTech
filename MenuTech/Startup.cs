@@ -1,9 +1,11 @@
 using MenuTech.Models;
+using MenuTech.Models.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,9 +31,10 @@ namespace MenuTech
         {
             services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", options => { });
 
-            //services.AddDbContext<MenuTechContext>(options =>options.UseSqlServer(Configuration.GetConnectionString("YourConnnectionString")));
-            services.AddDbContext<MenuTechContext>(options => { });
-            //services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+            services.AddDbContext<MenuTechContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
+
+            services.AddScoped<IMenuTechRepository, MenuTechRepository>();
+
             services.AddControllers();
 
         }
@@ -54,26 +57,7 @@ namespace MenuTech
 
             app.UseEndpoints(endpoints =>
             {
-
                 endpoints.MapControllers();
-                //endpoints.MapControllerRoute(
-                //    name: "GetCustomerAccBalance",
-                //    pattern: "{controller=Store}/{action=GetCustomerAccBalance}/{id?}"
-                //    );
-
-                //endpoints.MapControllerRoute(
-                //        name: "Pay",
-                //        pattern: "{controller=Store}/{action=Pay}"
-                //    );
-
-                //endpoints.MapControllerRoute(
-                //        name: "Refund",
-                //        pattern: "{controller=Store}/{action=Refund}"
-                //    );
-                //endpoints.MapControllerRoute(
-                //        name: "default",
-                //        pattern: "{controller=Store}/{action=GetStoreAccBalance}"
-                //    );
             });
         }
     }

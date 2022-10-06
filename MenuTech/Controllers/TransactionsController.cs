@@ -1,4 +1,5 @@
 ﻿using MenuTech.Models;
+using MenuTech.Models.Repository;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,17 +13,19 @@ namespace MenuTech.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
+        private MenuTechContext _context;
+        private readonly IMenuTechRepository _menuTechRepository;
+
+        public TransactionsController(MenuTechContext menuTechContext, IMenuTechRepository menuTechRepository)
+        {
+            _context = menuTechContext;
+            _menuTechRepository = menuTechRepository;
+
+        }
         [HttpGet]
         public object GetTransctions(int Id)
         {
-
-            MenuTechContext context = new MenuTechContext();
-
-            var transactions = context.StoreAccounts.Where(c=>c.CustomerId==Id ).Select(c=> new {c.TransactionId,c.CustomerId,c.TransactionPlus,c.Refund });
-
-
-
-            return transactions;
+            return _menuTechRepository.GetTransactions(Id);
         }
     }
 }
